@@ -1,7 +1,7 @@
 # SeattleAirbnb
 
 ### Data Overview
-[Data Source](https://insideairbnb.com/get-the-data/) /n
+[Data Source](https://insideairbnb.com/get-the-data/) \
 I used the Seattle listings.csv file. It contained 90 columns and 7769 rows of data.
 
 ### Part 1 - Cleaning the Data
