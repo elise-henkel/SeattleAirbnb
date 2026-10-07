@@ -1,0 +1,57 @@
+---
+title: "Seattle AirBNB Data Cleanup"
+author: "Elise Henkel"
+date: "2026-10-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+#load in the data, exactly as it was downloaded from https://insideairbnb.com/get-the-data/
+listings = read.csv("extractedfiles\\listings.csv")
+```
+
+```{r}
+#check to make sure there are no duplicate rows
+sum(duplicated(listings$id)) == 0
+```
+```{r}
+#remove columns where all data is NA
+listings_tmp = listings %>%
+  select(where(~ sum(is.na(.)) != nrow(listings)))
+```
+
+```{r}
+#creating vectors of columns that should be logical and columns that should be dates instead of characters
+logical = c('host_is_superhost', 'host_has_profile_pic', 'host_identity_verified', 'has_availability')
+dates = c('last_scraped', 'price_quote_checkin_date', 'price_quote_checkout_date', 'calendar_last_scraped', 'first_review', 'last_review')
+
+#changing all necessary data types
+clean = listings_tmp %>%
+  mutate(across(all_of(logical), as.logical)) %>%
+  mutate(across(all_of(dates), as.Date)) %>%
+  mutate(price = as.numeric(str_remove_all(price, "[\\$,]")))
+```
+
+```{r, results='hide', message=FALSE, warning=FALSE, fig.show='hide'}
+#create box plots for each numeric column to identify any outliers that should be investigated
+numeric_cols <- names(clean)[sapply(clean, is.numeric)]
+for (col in numeric_cols) {
+  boxplot(clean[[col]], 
+          main = paste("Box Plot of", col), 
+          ylab = col)
+}
+```
+The box plots have been hidden because there was 49 of them, but none of the plots revealed any suspicious data points requiring further investigation.
+
+```{r}
+#save cleaned data as a CSV file for future use
+write_csv(clean, "listings_cleaned.csv")
+```
+
